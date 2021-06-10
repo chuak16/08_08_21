@@ -21,11 +21,7 @@ def tank(X, t, qin=0):
     qout2 = (h2) / R2
     dh1dt = (qin - qout1) / A1
     dh2dt = (qout1 - qout2) / A2
-    # print(t)
-    # print(qin)
-    # print([dh1dt, dh2dt])
-    dhdt = [dh1dt, dh2dt]
-    return dhdt
+    return [dh1dt, dh2dt]
 
 
 # 4. Choose initial conditions and time grid
@@ -34,30 +30,31 @@ t = np.linspace(0, 100, 100)
 
 # 5. Perform the simulation by numerical solution of the differential equations
 sol = odeint(tank, IC, t, args=(qin,))
+
 H1 = np.zeros(100)
 H2 = np.zeros(100)
-# print(H1)
+
 # 6. Prepare visualizations and post-processing
 for i in range(len(t)):
-    plt.clf()
+    # plt.clf()
+
     H1[i] = H1[i] + sol[i][0]
     H2[i] = H2[i] + sol[i][1]
-    # print(H1[i])
-    plt.figure(1)
-    plt.plot(t, H1, 'b-', label='Tank 1')
-    plt.plot(t, H2, 'r-', label='Tank 2')
-    plt.axis([0, 100, 0, 100])
-    plt.legend(loc='upper right')
-    plt.xlabel('Time')
-    plt.ylabel('Height [m]')
-    plt.title('Simulation of Two Tanks in Series')
+
+    # plt.figure(1)
+    # plt.plot(t, H1, 'b-', label='Tank 1')
+    # plt.plot(t, H2, 'r-', label='Tank 2')
+    # plt.axis([0, 100, 0, 100])
+    # plt.legend(loc='upper right')
+    # plt.xlabel('Time')
+    # plt.ylabel('Height [m]')
+    # plt.title('Simulation of Two Tanks in Series')
     # plt.show()
-    time.sleep(0.01)
-# print(t, H1, H2)
-plt.show()
+    # time.sleep(0.01)
+
 # 7 Date extraction from Python to Microsoft Excel
 
-# df = pd.DataFrame({'time': t, 'Height Tank 1 ': H1, 'Height Tank 2': H2})
-# writer = pd.ExcelWriter('Tank.xlsx', engine='xlsxwriter')
-# export_data = df.to_excel(writer, sheet_name='Tank')
-# writer.save()
+df = pd.DataFrame({'time': t, 'Height Tank 1 ': H1, 'Height Tank 2': H2})
+writer = pd.ExcelWriter('Tank_true.xlsx', engine='xlsxwriter')
+export_data = df.to_excel(writer, sheet_name='Tank')
+writer.save()

@@ -4,7 +4,8 @@ from matplotlib.animation import FuncAnimation
 from scipy.integrate import odeint
 from matplotlib import pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-
+import pandas as pd
+from xlsxwriter import Workbook
 
 def tank(X, t, qin,A1,A2,R1,R2):
     h1, h2 = X
@@ -52,7 +53,7 @@ def gui(A1,A2,R1,R2,qin):
     qin_variable = tk.StringVar()
     qin_variable.set(qin)
     tk.Label(parameter, textvariable=qin_variable).place(relx=0.15, rely=0.5, anchor='nw')
-    tk.Button(parameter, text="Save", command=save_parameter).place(relx=0.22, rely=0.6, anchor="s")
+    tk.Button(parameter, text="Change Value", command=save_parameter).place(relx=0.22, rely=0.6, anchor="s")
     return parameter, A1_entry, A1_variable, A2_entry, A2_variable, R1_entry, R1_variable, R2_entry, R2_variable, qin_entry, qin_variable
 
 
@@ -86,9 +87,8 @@ def live_data(i):
     global R2
     global qin
     IC = [0, 0]
-    t.append(t[-1] + 1)
-    sol = odeint(tank, IC, t, args=(qin,A1,A2,R1,R2))
     x_vals.append(next(index))
+    sol = odeint(tank, IC, x_vals, args=(qin,A1,A2,R1,R2))
     H1.append(sol[i][0])
     H2.append(sol[i][1])
     plt.cla()
@@ -105,10 +105,9 @@ A2 = 66.4424
 R1 = 1.575
 R2 = 0.99
 qin = 33.34
-x_vals = [0]
-H1 = [0]
-H2 = [0]
-t = [0]
+x_vals = []
+H1 = []
+H2 = []
 index = count()
 
 parameter, A1_entry, A1_variable, A2_entry, A2_variable, R1_entry, R1_variable, R2_entry, R2_variable, qin_entry, qin_variable= gui(A1,A2,R1,R2,qin)
@@ -116,3 +115,8 @@ canvas = FigureCanvasTkAgg(plt.gcf(), master=parameter)
 canvas.get_tk_widget().place(relx=0.35, rely=0.0, anchor='nw')
 animation = FuncAnimation(plt.gcf(), live_data, interval=10)
 parameter.mainloop()
+
+df=pd.DataFrame({'time':x_vals,'Height Tank 1 ':H1, 'Height Tank 2':H2})
+writer=pd.ExcelWriter('Tank.xlsx',engine='xlsxwriter')
+export_data=df.to_excel(writer,sheet_name='Tank')
+writer.save()
